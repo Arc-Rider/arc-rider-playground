@@ -1,0 +1,15 @@
+{
+  "name": "arcwidgets-playground",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Live Jev demos using the published arcWidgets React package",
+  "workspaces": [
+    "demos/jev/prompt-driven-views"
+  ],
+  "scripts": {
+    "dev": "npm run dev --workspace @arcrider/playground-prompt-driven-views",
+    "build": "npm run build --workspace @arcrider/playground-prompt-driven-views",
+    "test": "npm run test --workspace @arcrider/playground-prompt-driven-views",
+    "test:ui": "npm run test:ui --workspace @arcrider/playground-prompt-driven-views"
+  }
+}

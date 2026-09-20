@@ -1,0 +1,71 @@
+.minimal-live-demo{height:100svh;overflow:hidden}
+.minimal-live-demo .topbar{height:84px;padding:0 54px}
+.minimal-live-demo .top-meta{gap:28px}
+.minimal-live-sample{color:#a0a0ab;font:10px ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:1.2px}
+.minimal-live-schema-button{border:0;background:transparent;color:#595a67;font:inherit;cursor:pointer;padding:4px 0}
+.minimal-live-schema-button:hover,.minimal-live-schema-button:focus-visible{text-decoration:underline;text-underline-offset:4px}
+.minimal-live-state{display:inline-flex;align-items:center;gap:7px;font:10px ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:1.2px;color:#8b8b96}
+.minimal-live-state i{width:5px;height:5px;background:#a0a0aa}
+.minimal-live-state[data-active=true]{color:#456d5a}.minimal-live-state[data-active=true] i{background:#67a27b}
+.minimal-live-stage{height:calc(100svh - 84px);max-width:1300px;width:100%;padding:54px 40px 24px;margin:0 auto;display:flex;flex-direction:column}
+.minimal-live-surface{width:100%;background:#fff;min-height:0}
+.minimal-live-surface #minimal-live-table{font-size:11px}
+.minimal-live-surface .arc_widget_table_cell{font-size:11px}
+.minimal-live-bottom{width:100%;max-width:940px;margin:auto auto 0;text-align:center;flex-shrink:0}
+.minimal-live-form{display:flex;align-items:center;gap:8px;max-width:840px;margin:0 auto}
+.minimal-live-form textarea{display:block;min-width:0;width:100%;height:96px;padding:20px 10px 0;border:0;outline:0;background:transparent;color:#40404b;resize:none;text-align:center;font:400 25px/1.6 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;letter-spacing:-.35px}
+.minimal-live-form textarea::placeholder{color:#a2a2ad;opacity:1}
+.minimal-live-form textarea:focus-visible{outline:0}
+.minimal-live-form button{width:36px;height:36px;flex-shrink:0;border:0;background:#31313a;color:white;font-size:22px;line-height:1;cursor:pointer}
+.minimal-live-form button:disabled{background:#e6e6ea;color:#9b9ba5;cursor:default}
+.minimal-live-hint{margin:6px 0 0;color:#aaaab4;font:9px ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:1.2px}
+.minimal-live-notice{min-height:18px;margin:19px 0 0;color:#777784;font:11px ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:.2px}
+.minimal-live-error{margin:8px 0 0;color:#ad4350;font-size:12px}
+.minimal-live-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap}
+.minimal-live-drawer-layer{position:fixed;inset:0;z-index:100;display:flex;justify-content:flex-end}
+.minimal-live-backdrop{position:absolute;inset:0;border:0;background:rgba(28,28,36,.27);cursor:pointer}
+.minimal-live-drawer{position:relative;width:min(530px,100vw);height:100%;padding:26px 32px 42px;background:#fff;border-left:1px solid #dedee6;overflow:auto;color:#42424c;font-size:13px;line-height:1.6}
+.minimal-live-drawer-head{display:flex;justify-content:space-between;align-items:center;color:#9999a4;font:10px ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:1.5px}
+.minimal-live-drawer-head button{border:0;background:transparent;color:#5e5e68;font-size:28px;line-height:1;cursor:pointer}
+.minimal-live-drawer h2{font-size:27px;letter-spacing:-.8px;margin:20px 0 8px;color:#292932}
+.minimal-live-drawer>p{color:#737380;margin:0 0 23px}
+.minimal-live-drawer section{padding:20px 0;border-top:1px solid #e9e9ef}
+.minimal-live-drawer h3{font-size:13px;color:#33333d;margin:0 0 13px}
+.minimal-live-drawer h4{font-size:11px;margin:21px 0 8px}
+.minimal-live-drawer dl{display:grid;grid-template-columns:105px 1fr;gap:10px 16px;margin:0}
+.minimal-live-drawer dt{font-weight:650;color:#4a4a55}
+.minimal-live-drawer dd{margin:0;color:#757582}
+.minimal-live-pipeline{display:flex;gap:0;border:1px solid #e5e5eb;margin-bottom:24px}
+.minimal-live-pipeline span{flex:1;min-width:0;padding:12px 9px;text-align:center;font:10px/1.4 ui-monospace,SFMono-Regular,Menlo,monospace;color:#656571}
+.minimal-live-pipeline span+span{border-left:1px solid #e5e5eb}
+.minimal-live-props>p{margin:0 0 14px;color:#737380}
+.minimal-live-props code{font:11px ui-monospace,SFMono-Regular,Menlo,monospace;color:#4e4e5a}
+.minimal-live-prop-chain{display:grid;gap:0;border:1px solid #e5e5eb;margin:8px 0 13px}
+.minimal-live-prop-chain>div{display:flex;flex-direction:column;gap:5px;padding:10px 12px;min-width:0}
+.minimal-live-prop-chain>div+div{border-top:1px solid #e5e5eb}
+.minimal-live-prop-chain small{color:#9999a4;font:9px ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:1px}
+.minimal-live-prop-chain span{color:#545461;font-size:12px;overflow-wrap:anywhere}
+.minimal-live-props details summary{font-weight:600}
+.minimal-live-caveat{margin:20px 0 0;color:#898994;font-size:12px}
+.minimal-live-examples{display:flex;flex-direction:column;align-items:flex-start;gap:5px}
+.minimal-live-examples button{border:0;background:transparent;color:#525469;padding:4px 0;cursor:pointer;text-align:left;font:inherit}
+.minimal-live-examples button:hover{text-decoration:underline;text-underline-offset:3px}
+.minimal-live-decision-summary{display:flex;justify-content:space-between;gap:8px;color:#51515c}
+.minimal-live-decision-summary span{color:#8e8e99;font:10px ui-monospace,SFMono-Regular,Menlo,monospace}
+.minimal-live-request-quote{margin:12px 0;color:#6d6d79}
+.minimal-live-answer-list{border-top:1px solid #e9e9ee}
+.minimal-live-answer-list>div{display:grid;grid-template-columns:1fr auto 50px;gap:8px;align-items:center;padding:6px 0;border-bottom:1px solid #ededf1;font-size:11px}
+.minimal-live-answer-list span{text-transform:capitalize;color:#797985}.minimal-live-answer-list b{font-weight:600}.minimal-live-answer-list small{text-align:right;color:#9595a0}
+.minimal-live-drawer ul{padding-left:18px;margin:7px 0 16px;color:#73737e}
+.minimal-live-drawer details{margin:8px 0}.minimal-live-drawer summary{cursor:pointer;color:#5c5c68}
+.minimal-live-drawer pre{overflow:auto;max-height:310px;padding:12px;background:#f7f7f9;border:1px solid #ebebf0;color:#676773;font:10px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace}
+.minimal-live-drawer-actions{display:flex;gap:12px;margin-top:12px}.minimal-live-drawer-actions button{border:1px solid #dddde5;background:#fff;padding:9px 13px;color:#575762;cursor:pointer}.minimal-live-drawer-actions button:disabled{opacity:.45;cursor:default}
+@media(max-width:900px){.minimal-live-demo{height:auto;min-height:100svh;overflow:visible}.minimal-live-demo .topbar{height:64px;padding:0 18px}.minimal-live-demo .top-meta{gap:12px}.minimal-live-stage{height:auto;min-height:calc(100svh - 64px);padding:30px 18px 20px}.minimal-live-surface{overflow-x:auto}.minimal-live-surface>div{min-width:780px}.minimal-live-bottom{margin:42px auto 0}.minimal-live-form textarea{font-size:18px}.minimal-live-drawer{padding:22px}.minimal-live-state{display:none}.minimal-live-sample{display:none}}
+.minimal-demo{min-height:100svh;background:#fff;color:#27272a}
+.minimal-demo *,.minimal-demo *::before,.minimal-demo *::after{border-radius:0!important;box-shadow:none!important}
+.minimal-live-demo .minimal-lane-heading{display:flex;align-items:center;gap:10px;width:100%;min-width:0;padding:5px 3px;font:500 13px/1.4 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+.minimal-live-demo .minimal-status-mark{width:5px;height:5px;flex-shrink:0}
+.minimal-live-demo .minimal-lane-count{margin-left:auto;color:#9696a3;font:11px/1 ui-monospace,SFMono-Regular,Menlo,monospace;letter-spacing:1px}
+.minimal-table-card-id{font:10px ui-monospace,SFMono-Regular,Menlo,monospace;color:#aaa7af}
+.minimal-table-card strong{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;line-height:1.5;font-size:13px;font-weight:550;color:#43424b;margin:7px 0 10px}
+.minimal-table-card>div{display:flex;align-items:center;justify-content:space-between;gap:10px;color:#9895a0;font-size:11px}
