@@ -9,7 +9,7 @@ Runnable, live examples built with the [published arcWidgets React package](http
 
 Both use fictional data and make real TypeSafe calls when configured. There are no scripted presentations or prerecorded decisions in this repository. Presentation scripts and videos remain in the separate local widget sandbox and can be developed independently.
 
-`demos/apps` and `demos/mcp` are reserved for future examples.
+The [MCP grouped table](demos/mcp/arcwidgets-table/README.md) is a third, independent example. An MCP tool returns fictional database objects and a linked UI resource renders them with published arcWidgets. You can preview its UI locally without an MCP host or connect the read-only tool to a host that supports MCP Apps. `demos/apps` is reserved for future examples.
 
 ## Run locally
 
@@ -28,8 +28,8 @@ npm run build
 npm run test:ui
 ```
 
-The UI check needs Playwright Chromium (`npx playwright install chromium`). CI runs these checks.
+The UI check needs Playwright Chromium (`npx playwright install chromium`). CI runs these checks. See the [MCP example setup](demos/mcp/arcwidgets-table/README.md) to run or preview its separate server.
 
 ## Publishing boundary
 
-The repository contains no API key, GitHub issue import, customer data, scripted recording or widget-library source. The local Jev server is development middleware bound to localhost. A public deployment needs authentication and usage controls on its own backend. The example code is [MIT licensed](LICENSE); [brand assets](BRAND.md) and the installed arcWidgets package have separate rights and [commercial terms](https://www.arc-rider.com/terms).
+The repository contains no API key, GitHub issue import, customer data, scripted recording or widget-library source. The MCP table is read-only and uses fictional rows. The local Jev server is development middleware bound to localhost. A public deployment needs authentication and usage controls on its own backend. The example code is [MIT licensed](LICENSE); [brand assets](BRAND.md) and the installed arcWidgets package have separate rights and [commercial terms](https://www.arc-rider.com/terms).

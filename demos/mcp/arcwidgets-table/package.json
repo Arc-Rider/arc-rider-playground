@@ -1,0 +1,32 @@
+{
+  "name": "@arcrider/playground-mcp-table",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Read-only sample database explorer as an arcWidgets MCP App",
+  "scripts": {
+    "build": "tsc --noEmit && tsc -p tsconfig.server.json && cross-env INPUT=mcp-app.html vite build",
+    "start": "node dist/main.js --stdio",
+    "preview": "cross-env INPUT=mcp-app.html vite preview --host 127.0.0.1 --port 4193 --strictPort",
+    "test": "npm run build && node scripts/check-mcp.mjs"
+  },
+  "dependencies": {
+    "@arcrider/arcwidgets-react": "0.1.0-alpha.5",
+    "@modelcontextprotocol/ext-apps": "2.0.0",
+    "@modelcontextprotocol/server": "2.0.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "zod": "4.2.0"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/client": "2.0.0",
+    "@types/node": "22.19.5",
+    "@types/react": "19.1.12",
+    "@types/react-dom": "19.1.9",
+    "@vitejs/plugin-react": "5.2.0",
+    "cross-env": "10.1.0",
+    "typescript": "5.9.3",
+    "vite": "6.4.3",
+    "vite-plugin-singlefile": "2.3.3"
+  }
+}

@@ -1,3 +1,3 @@
-# MCP
+# MCP Apps
 
-This section is for demos that connect MCP tools to an arcWidgets interface. No MCP demo has been added yet. Keep tool permissions and write actions explicit, and provide a mode that can be tried without private credentials when possible.
+The [grouped table example](arcwidgets-table/README.md) registers a read-only MCP tool and a linked HTML UI resource. Its React view renders the published `@arcrider/arcwidgets-react` table, badges, progress bars, icons and KPIs. All database records are fictional; no credentials or database are needed.
