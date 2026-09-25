@@ -1,0 +1,225 @@
+{
+  "revision": 0,
+  "title": "Customer Day 2026",
+  "date": "2026-10-15",
+  "timezone": "Europe/Berlin",
+  "attendees": 80,
+  "rooms": [
+    {
+      "id": "stage",
+      "name": "Main stage"
+    },
+    {
+      "id": "studio",
+      "name": "Workshop studio"
+    },
+    {
+      "id": "foyer",
+      "name": "Foyer"
+    }
+  ],
+  "speakers": [
+    {
+      "id": "maya",
+      "name": "Maya Chen",
+      "role": "Keynote · Product strategy",
+      "availableFrom": 540
+    },
+    {
+      "id": "leo",
+      "name": "Leo Weber",
+      "role": "Workshop · Automation",
+      "availableFrom": 540
+    },
+    {
+      "id": "nora",
+      "name": "Nora Ali",
+      "role": "Panel · Customer success",
+      "availableFrom": 600
+    }
+  ],
+  "sessions": [
+    {
+      "id": "welcome",
+      "title": "Doors open & coffee",
+      "roomId": "foyer",
+      "start": 540,
+      "segments": [
+        {
+          "id": "coffee",
+          "title": "Welcome coffee",
+          "duration": 30,
+          "speakerIds": []
+        }
+      ]
+    },
+    {
+      "id": "keynote",
+      "title": "Building what comes next",
+      "roomId": "stage",
+      "start": 570,
+      "segments": [
+        {
+          "id": "intro",
+          "title": "Opening remarks",
+          "duration": 10,
+          "speakerIds": [
+            "nora"
+          ]
+        },
+        {
+          "id": "vision",
+          "title": "The next chapter",
+          "duration": 35,
+          "speakerIds": [
+            "maya"
+          ]
+        },
+        {
+          "id": "questions",
+          "title": "Audience Q&A",
+          "duration": 15,
+          "speakerIds": [
+            "maya",
+            "nora"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "automation",
+      "title": "Automation lab",
+      "roomId": "studio",
+      "start": 600,
+      "segments": [
+        {
+          "id": "brief",
+          "title": "Workflow briefing",
+          "duration": 15,
+          "speakerIds": [
+            "leo"
+          ]
+        },
+        {
+          "id": "lab",
+          "title": "Hands-on lab",
+          "duration": 45,
+          "speakerIds": [
+            "leo"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "stories",
+      "title": "Customer stories",
+      "roomId": "stage",
+      "start": 615,
+      "segments": [
+        {
+          "id": "story",
+          "title": "From pilot to production",
+          "duration": 45,
+          "speakerIds": [
+            "nora"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "roundtable",
+      "title": "Ask the builders",
+      "roomId": "studio",
+      "start": 660,
+      "segments": [
+        {
+          "id": "maya-talk",
+          "title": "Product decisions",
+          "duration": 25,
+          "speakerIds": [
+            "maya"
+          ]
+        },
+        {
+          "id": "leo-talk",
+          "title": "Making it work",
+          "duration": 20,
+          "speakerIds": [
+            "leo"
+          ]
+        },
+        {
+          "id": "panel",
+          "title": "Open discussion",
+          "duration": 30,
+          "speakerIds": [
+            "maya",
+            "leo"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "lunch",
+      "title": "Lunch & connections",
+      "roomId": "foyer",
+      "start": 750,
+      "locked": true,
+      "segments": [
+        {
+          "id": "lunch",
+          "title": "Lunch · fixed time",
+          "duration": 60,
+          "speakerIds": []
+        }
+      ]
+    },
+    {
+      "id": "design",
+      "title": "Design your next workflow",
+      "roomId": "studio",
+      "start": 810,
+      "segments": [
+        {
+          "id": "design-intro",
+          "title": "Problem framing",
+          "duration": 20,
+          "speakerIds": [
+            "nora"
+          ]
+        },
+        {
+          "id": "build",
+          "title": "Co-creation workshop",
+          "duration": 55,
+          "speakerIds": [
+            "leo"
+          ]
+        },
+        {
+          "id": "review",
+          "title": "Show & tell",
+          "duration": 15,
+          "speakerIds": [
+            "nora",
+            "leo"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "networking",
+      "title": "Meet the community",
+      "roomId": "foyer",
+      "start": 960,
+      "segments": [
+        {
+          "id": "meet",
+          "title": "Networking",
+          "duration": 120,
+          "speakerIds": []
+        }
+      ]
+    }
+  ]
+}

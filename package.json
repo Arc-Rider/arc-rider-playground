@@ -5,14 +5,18 @@
   "description": "Jev and MCP demos using the published arcWidgets React package",
   "workspaces": [
     "demos/jev/prompt-driven-views",
-    "demos/mcp/arcwidgets-table"
+    "demos/mcp/arcwidgets-table",
+    "demos/mcp/arc-event"
   ],
   "scripts": {
     "dev": "npm run dev --workspace @arcrider/playground-prompt-driven-views",
-    "build": "npm run build --workspace @arcrider/playground-prompt-driven-views && npm run build --workspace @arcrider/playground-mcp-table",
-    "test": "npm run test --workspace @arcrider/playground-prompt-driven-views && npm run test --workspace @arcrider/playground-mcp-table",
+    "build": "npm run build --workspace @arcrider/playground-prompt-driven-views && npm run build --workspace @arcrider/playground-mcp-table && npm run event:build",
+    "test": "npm run test --workspace @arcrider/playground-prompt-driven-views && npm run test --workspace @arcrider/playground-mcp-table && npm run event:test",
     "test:ui": "npm run test:ui --workspace @arcrider/playground-prompt-driven-views",
     "mcp:start": "npm run start --workspace @arcrider/playground-mcp-table",
-    "mcp:preview": "npm run preview --workspace @arcrider/playground-mcp-table"
+    "mcp:preview": "npm run preview --workspace @arcrider/playground-mcp-table",
+    "event:start": "npm run start --workspace @arcrider/playground-arc-event",
+    "event:build": "npm run build --workspace @arcrider/playground-arc-event",
+    "event:test": "npm run test --workspace @arcrider/playground-arc-event"
   }
 }
