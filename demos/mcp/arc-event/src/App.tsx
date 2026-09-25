@@ -1,5 +1,5 @@
 import { useApp, useHostStyles } from '@modelcontextprotocol/ext-apps/react';
-import { ArcWidgetCalendarWeek, ArcWidgetCalendarTimeline, ArcWidgetTable, ArcWidgetProgressBar, ArcWidgetBadge, ArcWidgetButton, type ArcWidgetCalendarTimelineProps, type ArcWidgetCalendarWeekProps, type ArcWidgetTableData } from '@arcrider/arcwidgets-react';
+import { ArcWidgetCalendarWeek, ArcWidgetCalendarTimeline, ArcWidgetTable, ArcWidgetProgressBar, ArcWidgetBadge, ArcWidgetButton, ArcWidgetLayout, type ArcWidgetCalendarTimelineProps, type ArcWidgetCalendarWeekProps, type ArcWidgetTableData } from '@arcrider/arcwidgets-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { clock, end, parts, nativeMoveChanges, type NativeSegmentMove, weekDates, type Change, type Session, type Snapshot } from '../event';
 
@@ -10,7 +10,13 @@ const parse = (value: unknown): Payload => { const s = value as Payload; if (!s?
 async function request(path: string, body?: Change) { const r = await fetch(path, body ? { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) } : undefined); const json = await r.json(); if (!r.ok) throw new Error(json.error ?? 'Request failed'); return parse(json); }
 const local: Bridge = { read: () => request('api/plan'), save: change => request('api/changes', change) };
 const viewNames: Record<View,string> = {calendar:'Week',timeline:'Timeline',table:'Sessions',capacity:'Bookings'};
-export function EventApp() { const preview = new URLSearchParams(window.location.search).get('mcp'); const initialView = preview && preview in viewNames ? preview as View : 'calendar'; return window.parent === window ? <Planner bridge={local} compact={!!preview} initialView={initialView}/> : <Embedded />; }
+export function EventApp() {
+  const params = new URLSearchParams(window.location.search);
+  const preview = params.get('mcp');
+  const standalone = window.parent === window || params.get('standalone') === '1';
+  const initialView = preview && preview in viewNames ? preview as View : 'calendar';
+  return standalone ? <Planner bridge={local} compact={!!preview} initialView={initialView}/> : <Embedded />;
+}
 function Embedded() {
   const [incoming, setIncoming] = useState<Payload>();
   const { app, error } = useApp({ appInfo: { name: 'arcEvent', version: '0.2.0' }, capabilities: {}, autoResize: true,
@@ -49,7 +55,7 @@ function Planner({ bridge, incoming, compact=false, initialView='calendar' }: { 
   const nativeMoves = useRef<NativeSegmentMove[]>([]); const [calendarReset, setCalendarReset] = useState(0);
   const [selected, setSelected] = useState<string>(); const [busy, setBusy] = useState(false); const busyRef = useRef(false);
   const [message, setMessage] = useState(''); const [error, setError] = useState('');
-  const [timelineDay, setTimelineDay] = useState<string>('all'); const [groupBy, setGroupBy] = useState('rooms');
+  const [timelineDay, setTimelineDay] = useState<string>(weekDates[0]); const [groupBy, setGroupBy] = useState('rooms');
   const [filter, setFilter] = useState('all'); const [showConflicts, setShowConflicts] = useState(false);
   const accept = (next: Payload) => setState(prev => prev && prev.plan.revision > next.plan.revision ? prev : next);
   useEffect(() => { let live = true; bridge.read().then(s => { if (live) accept(s); }).catch(e => { if (live) setError(e.message); }); return () => { live = false; }; }, [bridge]);
@@ -98,27 +104,29 @@ function Planner({ bridge, incoming, compact=false, initialView='calendar' }: { 
   const visible = plan.sessions.filter(s => filter === 'all' || s.roomId === filter || s.segments.some(p => p.speakerIds.includes(filter)));
   const sorted = [...visible].sort((a,b) => a.date!.localeCompare(b.date!) || a.start - b.start);
   const timelineResources = groupBy==='rooms' ? plan.rooms : plan.speakers;
-  const timelineParts = (row: number) => {
+  const timelineSessions = (row: number) => {
     const resource = timelineResources[row];
-    return resource ? visible.filter(s=>timelineDay==='all' || s.date===timelineDay).flatMap(s=>parts(s).filter(p=>groupBy==='rooms'?s.roomId===resource.id:p.speakerIds.includes(resource.id))) : [];
+    return resource ? visible.filter(s=>(timelineDay==='all' || s.date===timelineDay) && (groupBy==='rooms'?s.roomId===resource.id:s.segments.some(p=>p.speakerIds.includes(resource.id)))) : [];
   };
   const onTimelineDrag: NonNullable<ArcWidgetCalendarTimelineProps['onEntryDragSave']> = async (row,index,_start,rowChange,destination) => {
     try {
       const originRow = rowChange.start_row_index ?? row;
-      const part = timelineParts(originRow)[index];
-      const session = plan.sessions.find(s=>s.id===part?.sessionId);
+      const session = timelineSessions(originRow)[index];
       const target = timelineResources[rowChange.row_index ?? row];
-      if (!part || !session || !target) throw new Error('Unknown timeline destination.');
+      if (!session || !target) throw new Error('Unknown timeline destination.');
       const overview = timelineDay === 'all';
       const date = overview ? new Date(Number(destination.dateFrom)).toISOString().slice(0,10) : session.date;
       if (overview && Number(destination.dateTo)!==Number(destination.dateFrom)) throw new Error('Sessions must stay within one day.');
-      const from = overview ? part.start : Number(destination.timeFrom)/60000;
-      const to = overview ? part.end : Number(destination.timeTo)/60000 + 30;
+      const from = overview ? session.start : Number(destination.timeFrom)/60000;
+      const to = overview ? end(session) : Number(destination.timeTo)/60000 + 30;
       if (![from,to].every(Number.isFinite)) throw new Error('Incomplete timeline destination.');
-      const segments = session.segments.map(p=>p.id===part.id ? {...p,duration:to-from,
-        speakerIds:groupBy==='speakers' && originRow!==rowChange.row_index
-          ? [...new Set(p.speakerIds.map(id=>id===timelineResources[originRow].id?target.id:id))] : p.speakerIds} : p);
-      await save([{id:session.id,date,start:session.start+from-part.start,segments,...(groupBy==='rooms'?{roomId:target.id}:{})}]);
+      const durationDelta = (to-from) - (end(session)-session.start);
+      const resizeIndex = Math.max(0, session.segments.findIndex(p=>p.id==='main'));
+      const segments = session.segments.map((p,i)=>({...p,
+        duration:p.duration+(i===resizeIndex?durationDelta:0),
+        speakerIds:groupBy==='speakers' && originRow!==(rowChange.row_index ?? row)
+          ? [...new Set(p.speakerIds.map(id=>id===timelineResources[originRow].id?target.id:id))] : p.speakerIds}));
+      await save([{id:session.id,date,start:from,segments,...(groupBy==='rooms'?{roomId:target.id}:{})}]);
     } catch(e) { setError((e as Error).message); }
     finally { setCalendarReset(n=>n+1); }
   };
@@ -127,6 +135,16 @@ function Planner({ bridge, incoming, compact=false, initialView='calendar' }: { 
     {p.id==='main' && <div className="segment-topic">{session.topic}</div>}
     <div className="segment-title">{p.title}</div>
   </div>;
+  const timelineContent = (session:Session) => {
+    const names = [...new Set(session.segments.flatMap(p=>p.speakerIds))].map(id=>plan.speakers.find(sp=>sp.id===id)?.name).filter(Boolean).join(', ');
+    const theme = themeFor(session);
+    return <div className="timeline-session" title={`${names || 'Organization'} · ${session.title} · ${clock(session.start)}–${clock(end(session))}`}>
+      <ArcWidgetLayout data={{embedded:true,direction:'horizontal',width:'100%',height:'100%',gap:'8px',paddingX:'4px',paddingY:'4px',alignY:'center',blocks:[
+        {width:'30px',alignY:'center',value:<ArcWidgetBadge data={{value:<svg width="18" height="18" viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="8" r="4" fill="currentColor"/><path d="M4 22v-3a8 8 0 0 1 16 0v3Z" fill="currentColor"/></svg>,width:'30px',height:'30px',paddingX:'0px',paddingY:'0px',borderRadius:'50%',backgroundColor:theme.ink,borderColor:theme.ink,fontColor:'#fff'}}/>},
+        {width:'fraction',alignY:'center',value:<div className="timeline-session-text"><div className="timeline-speaker">{names || 'Organization'}</div><div className="timeline-talk">{session.title}</div></div>},
+      ]}}/>
+    </div>;
+  };
   const table: ArcWidgetTableData = {
     height: '370px', styles: { fontSize: '12px', borderRadius: '0px', borders: { outer: true, columns: false, rows: { color: '#e7e7e7', width: '1px' } } },
     header: { showHeader: true, height: '34px', backgroundColor: '#fafafa', fontSize: '12px', columns: [{title:'Session',width:'auto'},{title:'When',width:'115px'},{title:'Room / speakers',width:'170px'},{title:'Bookings',width:'155px'}] },
@@ -164,15 +182,16 @@ function Planner({ bridge, incoming, compact=false, initialView='calendar' }: { 
     <header><div><strong>arcEvent</strong><span>{compact ? `Tech Summit · ${viewNames[view]}` : 'Tech Summit · 12–16 Oct 2026'}</span></div><div className="header-actions">{needsValidation && <ArcWidgetButton id="validate-plan" data={{title:busy?'Working…':'Validate Plan',height:'30px',fontSize:'12px',backgroundColor:'#27272a',fontColor:'#ffffff',borderRadius:'0px'}} onClick={validatePlan}/>} {!compact && <button onClick={refresh} disabled={busy} aria-label="Refresh plan">↻</button>}</div></header>
     {(compact && (error || validationMessage || busy)) && <div className="validation-status" role={error?'alert':'status'}>{error || (busy?'Saving…':validationMessage)}</div>}
     {!compact && <><nav aria-label="Event views">{(['calendar','timeline','table','capacity'] as View[]).map(v=><button key={v} aria-pressed={view===v} onClick={()=>{setView(v);setSelected(undefined);}}>{v==='calendar'?'Week':v==='timeline'?'Timeline':v==='table'?'Sessions':'Bookings'}</button>)}<button className="conflict-toggle" onClick={()=>setShowConflicts(!showConflicts)}>{conflicts.length} conflicts</button></nav>
-    <div className="toolbar"><span>{view==='calendar'?'Drag to move · changes are saved · Berlin time':view==='timeline'?timelineDay==='all'?'Summit overview · drag between days · select a day for hours':'Drag to move session · resize to adjust segment':view==='table'?`${visible.length} sessions · click to edit`:'Expand a session to see individual bookings'}</span><select aria-label="Filter rooms or speakers" value={filter} onChange={e=>setFilter(e.target.value)}><option value="all">All rooms & speakers</option><optgroup label="Rooms">{plan.rooms.map(r=><option key={r.id} value={r.id}>{r.name}</option>)}</optgroup><optgroup label="Speakers">{plan.speakers.map(r=><option key={r.id} value={r.id}>{r.name}</option>)}</optgroup></select></div>
-    {view==='timeline' && <div className="timeline-controls"><select aria-label="Timeline day" value={timelineDay} onChange={e=>setTimelineDay(e.target.value)}><option value="all">Full summit · 12–16 Oct</option>{weekDates.slice(0,5).map((d,i)=><option key={d} value={d}>{days[i]} {d.slice(8)} Oct</option>)}</select><select aria-label="Timeline grouping" value={groupBy} onChange={e=>setGroupBy(e.target.value)}><option value="rooms">By room</option><option value="speakers">By speaker</option></select></div>}
+    <div className="toolbar"><span>{view==='calendar'?'Drag to move · changes are saved · Berlin time':view==='timeline'?timelineDay==='all'?'Summit overview · drag between days · select a day for hours':'Drag to move session · resize to adjust main talk':view==='table'?`${visible.length} sessions · click to edit`:'Expand a session to see individual bookings'}</span><select aria-label="Filter rooms or speakers" value={filter} onChange={e=>setFilter(e.target.value)}><option value="all">All rooms & speakers</option><optgroup label="Rooms">{plan.rooms.map(r=><option key={r.id} value={r.id}>{r.name}</option>)}</optgroup><optgroup label="Speakers">{plan.speakers.map(r=><option key={r.id} value={r.id}>{r.name}</option>)}</optgroup></select></div>
+    {view==='timeline' && <select aria-label="Timeline grouping" value={groupBy} onChange={e=>setGroupBy(e.target.value)}><option value="rooms">By room</option><option value="speakers">By speaker</option></select>}
     <div className="mcp-preview-links"><span>MCP App previews</span>{(Object.keys(viewNames) as View[]).map(v=><a key={v} href={`?mcp=${v}`}>{viewNames[v]} ↗</a>)}</div>
     {validationMessage && <div className="validation-status" role="status">{validationMessage}</div>}
     </>}
     {showConflicts && <div className="conflicts">{conflicts.map(c=><button key={c.id} onClick={()=>setSelected(c.sessionIds[0])}>{c.message}</button>)}{!conflicts.length && <span>No conflicts</span>}</div>}
+    {view==='timeline' && <div className="timeline-day-nav" aria-label="Timeline day">{weekDates.slice(0,5).map((date,i)=><ArcWidgetButton key={date} id={`timeline-day-${i}`} data={{title:`${days[i]} ${date.slice(8)} Oct${i===2?' · Orga':''}`,height:'30px',fontSize:'11px',borderRadius:'0px',backgroundColor:timelineDay===date?'#27272a':i===2?'#fff2d5':'#f4f4f5',fontColor:timelineDay===date?'#fff':'#3f3f46'}} onClick={()=>{setTimelineDay(date);setSelected(undefined);}}/>)}</div>}
     <div className={`stage ${view === 'timeline' ? 'timeline-stage' : view !== 'calendar' ? 'table-stage' : ''}`}>
-      {view==='calendar' && <ArcWidgetCalendarWeek key={`${plan.revision}-${filter}-${calendarReset}`} id={`event-week-${filter}`} onEntryDragSave={onNativeDrag} onEntryClick={index=>{const segment=visible.flatMap(s=>parts(s))[index];if(segment)setSelected(segment.sessionId);}} data={{ height:'390px', timeSlotHeight:'56px', timeSlotWidth:'34px', timeZoneBalance:0, lang:'en', styles:{borderRadius:'0px'}, dateSettings:{startDate:Date.UTC(2026,9,12),duration:5,highlights:[breakDay],header:{title:{label:'##weekDayShort## ##day##',fontSize:'11px',alignX:'center'}}}, timeSettings:{timeStart:540*60000,duration:540*60000},timeEntries:visible.map(s=>({id:s.id,dateFrom:Date.parse(s.date!+'T00:00:00Z'),dateTo:Date.parse(s.date!+'T00:00:00Z'),timeFrom:s.start*60000,timeTo:end(s)*60000,draggable:!s.locked && !busy,clickable:true,styles:{backgroundColor:s.roomId==='studio'?'#eeebdf':'#e8ede9',color:'#294333',borderRadius:'0px'},segments:parts(s).map(p=>({id:p.id,duration:p.duration*60000,linked:true,insetBorder:{enabled:true,position:'left',stroke:p.id==='intro'||p.id==='demo'?'dotted':'solid',color:themeFor(s).ink},title:p.title,timeFrom:p.start*60000,timeTo:p.end*60000,styles:{backgroundColor:fillFor(s,p.id),color:themeFor(s).ink,borderRadius:'0px'},customLayout:segmentContent(s,p)}))})) }}/> }
-      {view==='timeline' && <ArcWidgetCalendarTimeline key={`${plan.revision}-${filter}-${timelineDay}-${groupBy}-${calendarReset}`} id="event-timeline" onEntryDragSave={onTimelineDrag} onEntryClick={(row,index)=>{const resource=(groupBy==='rooms'?plan.rooms:plan.speakers)[row];const p=visible.filter(s=>timelineDay==='all' || s.date===timelineDay).flatMap(s=>parts(s).filter(p=>groupBy==='rooms'?s.roomId===resource.id:p.speakerIds.includes(resource.id)))[index];if(p)setSelected(p.sessionId);}} data={{height:'350px',lang:'en',timeZoneBalance:0,...(timelineDay==='all'?{dateSettings:{startDate:Date.UTC(2026,9,12),duration:5,highlights:[{...breakDay,applyToRows:true}]},dayWidth:'76px',zoomSettings:{enabled:true,defaultDayWidth:'76px',minDayWidth:'40px',maxDayWidth:'240px',persist:false}}:{timeSettings:{startTime:9,duration:9,amount:0.5},columnWidth:'40px',zoomSettings:{enabled:true,defaultDayWidth:'40px',minDayWidth:'24px',maxDayWidth:'120px',persist:false}}),columns:[{title:groupBy==='rooms'?'Room':'Speaker',width:'125px'}],styles:{borderRadius:'0px'},items:(groupBy==='rooms'?plan.rooms:plan.speakers).map(resource=>({id:resource.id,columns:[{title:resource.name,fontSize:'12px'}],timeEntries:visible.filter(s=>timelineDay==='all' || s.date===timelineDay).flatMap(s=>parts(s).filter(p=>groupBy==='rooms'?s.roomId===resource.id:p.speakerIds.includes(resource.id)).map(p=>({id:`${s.id}-${p.id}`,dateFrom:Date.parse(s.date!+'T00:00:00Z'),dateTo:Date.parse(s.date!+'T00:00:00Z'),timeFrom:p.start*60000,timeTo:(p.end-30)*60000,draggable:!s.locked && !busy,styles:{backgroundColor:fillFor(s,p.id),color:themeFor(s).ink,borderRadius:'0px'},customLayout:segmentContent(s,p),clickable:true,title:p.title,subtitle:`${clock(p.start)}–${clock(p.end)}`})))}))}}/>}
+      {view==='calendar' && <div className="week-scroll"><div className="week-wide"><ArcWidgetCalendarWeek key={`${plan.revision}-${filter}-${calendarReset}`} id={`event-week-${filter}`} onEntryDragSave={onNativeDrag} onEntryClick={index=>{const segment=visible.flatMap(s=>parts(s))[index];if(segment)setSelected(segment.sessionId);}} data={{ height:'390px', timeSlotHeight:'56px', timeSlotWidth:'34px', timeZoneBalance:0, lang:'en', styles:{borderRadius:'0px'}, dateSettings:{startDate:Date.UTC(2026,9,12),duration:5,highlights:[breakDay],header:{title:{label:'##weekDayShort## ##day##',fontSize:'11px',alignX:'center'}}}, timeSettings:{timeStart:540*60000,duration:540*60000},timeEntries:visible.map(s=>({id:s.id,dateFrom:Date.parse(s.date!+'T00:00:00Z'),dateTo:Date.parse(s.date!+'T00:00:00Z'),timeFrom:s.start*60000,timeTo:end(s)*60000,draggable:!s.locked && !busy,clickable:true,styles:{backgroundColor:s.roomId==='studio'?'#eeebdf':'#e8ede9',color:'#294333',borderRadius:'0px'},segments:parts(s).map(p=>({id:p.id,duration:p.duration*60000,linked:true,insetBorder:{enabled:true,position:'left',stroke:p.id==='intro'||p.id==='demo'?'dotted':'solid',color:themeFor(s).ink},title:p.title,timeFrom:p.start*60000,timeTo:p.end*60000,styles:{backgroundColor:fillFor(s,p.id),color:themeFor(s).ink,borderRadius:'0px'},customLayout:segmentContent(s,p)}))})) }}/></div></div> }
+      {view==='timeline' && <ArcWidgetCalendarTimeline key={`${plan.revision}-${filter}-${timelineDay}-${groupBy}-${calendarReset}`} id="event-timeline" onEntryDragSave={onTimelineDrag} onEntryClick={(row,index)=>{const session=timelineSessions(row)[index];if(session)setSelected(session.id);}} data={{height:'350px',lang:'en',timeZoneBalance:0,timeSettings:{startTime:9,duration:9,amount:0.5},columnWidth:'70px',zoomSettings:{enabled:true,defaultDayWidth:'70px',minDayWidth:'24px',maxDayWidth:'120px',persist:false},columns:[{title:groupBy==='rooms'?'Room':'Speaker',width:'125px'}],styles:{borderRadius:'0px'},items:timelineResources.map((resource,row)=>({id:resource.id,columns:[{title:resource.name,fontSize:'12px'}],timeEntries:timelineSessions(row).map(s=>({id:s.id,dateFrom:Date.parse(s.date!+'T00:00:00Z'),dateTo:Date.parse(s.date!+'T00:00:00Z'),timeFrom:s.start*60000,timeTo:(end(s)-30)*60000,draggable:!s.locked && !busy,styles:{backgroundColor:fillFor(s,'main'),color:themeFor(s).ink,borderRadius:'0px'},customLayout:timelineContent(s),clickable:true,title:s.title,subtitle:`${clock(s.start)}–${clock(end(s))}`}))}))}}/>}
       {view==='table' && <ArcWidgetTable id="event-sessions" data={table}/>}
       {view==='capacity' && <ArcWidgetTable id="event-bookings" data={bookingTable}/>}
       {active && <div className="editor" role="dialog" aria-label="Edit session"><div className="editor-heading"><strong>{active.title}</strong><button aria-label="Close editor" onClick={()=>setSelected(undefined)}>×</button></div><Editor key={`${active.id}-${plan.revision}`} session={active} state={state} busy={busy} save={save}/></div>}

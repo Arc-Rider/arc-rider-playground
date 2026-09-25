@@ -22,7 +22,7 @@ Node 22+ recommended. No OpenAI API key is needed: the host calls MCP tools.
 ## Demo flow
 
 1. Call `show_event_calendar`, `show_event_timeline`, `show_event_table` or `show_event_capacity`. Each returns the shared snapshot with its requested `view` and the compact UI resource.
-2. Week shows Monday 12 through Friday 16 October 2026. The Tech Summit has eight talks on Monday, Tuesday, Thursday and Friday. Each talk is 30-minute intro, 60–150-minute main talk and 30-minute demo, with one hour between morning and afternoon blocks. Wednesday is a highlighted break/organization day with three internal appointments. Filter by room or speaker to inspect overlapping sessions.
+2. Week shows Monday 12 through Friday 16 October 2026. The Tech Summit has twelve talks on Monday, Tuesday, Thursday and Friday. Each talk is 30-minute intro, 60–150-minute main talk and 30-minute demo, with at least one hour between successive blocks in each room. Wednesday is a highlighted break/organization day with three internal appointments. Filter by room or speaker to inspect overlapping sessions.
 3. Drag a session natively to another day/time. Linked segment callbacks are saved atomically. Click a session or use Sessions to open its editor.
 4. Sessions uses the actual arcTable with date/time, room, speakers and booking progress in cells.
 5. Bookings uses a nested arcTable with individual bookings and capacity bars. Click a session to edit bookings or capacity. The server rejects negative, fractional and over-capacity counts.
@@ -88,4 +88,12 @@ After a successful save, the header shows a native ArcWidgetButton labelled Vali
 
 ### Hosting contract
 
+The bundled HTML includes a domain-bound `ArcWidgetsLicenseKeys` entry for `playground.arc-rider.com` so the hosted preview has no watermark. Localhost needs no key. Do not reuse this key on other live domains.
+
 `PLAYGROUND=1` requires a trusted gateway to validate session lifetime and overwrite `x-playground-session` with a 48-character lowercase hex session ID. Do not expose the demo service directly: the header is routing context, not authentication. `PLAYGROUND_STORE_DIR` holds one persisted event per session. Run one event process per storage directory; revision queues are process-local. Gateway access control, expiration and deployment remain outside this example repository. Concurrent first requests share the same store initialization.
+
+### Daily timeline
+
+The compact timeline shows one day on the native half-hour axis. Arc Buttons select Monday–Friday, with Wednesday marked as the organization day. Each session is one native draggable entry containing an Arc Layout with a circular profile badge, speaker name and talk title. Resizing changes the main-talk duration while preserving intro/demo durations. The week calendar retains its linked segments.
+
+The summit includes parallel morning talks on Main stage and Build studio with different speakers. Week uses an app-owned horizontal scroll container with a 1534px minimum calendar width (approximately 300px per weekday), retaining native overlap layout and dragging. Both views read the same sessions.

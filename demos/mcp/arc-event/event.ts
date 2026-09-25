@@ -17,7 +17,7 @@ export const clock = (m: number) => `${Math.floor(m / 60).toString().padStart(2,
 export const end = (s: Session) => s.start + s.segments.reduce((n, p) => n + p.duration, 0);
 export function parts(s: Session) { let start = s.start; return s.segments.map(p => { const item = { ...p, sessionId: s.id, roomId: s.roomId, date: s.date, start, end: start + p.duration }; start = item.end; return item; }); }
 export function seed(): EventPlan {
-  const talk = (id:string,title:string,topic:string,day:number,start:number,speaker:string,mainDuration=120):Session => ({id,title,topic,date:weekDates[day],roomId:start<720?'stage':'studio',start,segments:[
+  const talk = (id:string,title:string,topic:string,day:number,start:number,speaker:string,mainDuration=120,roomId=start<720?'stage':'studio'):Session => ({id,title,topic,date:weekDates[day],roomId,start,segments:[
     {id:'intro',title:'Intro',duration:30,speakerIds:[]},
     {id:'main',title,duration:mainDuration,speakerIds:[speaker]},
     {id:'demo',title:'Live demo',duration:30,speakerIds:[]},
@@ -28,15 +28,19 @@ export function seed(): EventPlan {
     speakers:[{id:'maya',name:'Maya Chen',role:'AI & product strategy',availableFrom:540},{id:'leo',name:'Leo Weber',role:'Platform engineering',availableFrom:540},{id:'nora',name:'Nora Ali',role:'Design & developer experience',availableFrom:540}],
     sessions:[
       talk('keynote','Designing useful AI agents','AI & Agents',0,540,'maya'),
+      talk('agent-lab','Building agent workflows','Platform Engineering',0,570,'leo',90,'studio'),
       talk('automation','From prototype to production','Platform Engineering',0,780,'leo',90),
       talk('design','Interfaces for intelligent products','Product Design',1,570,'nora',90),
+      talk('developer-tools','Developer tools that flow','Platform Engineering',1,570,'leo',90,'studio'),
       talk('data','A trusted foundation for AI','Data & Trust',1,780,'maya',150),
       orga('crew','Crew check-in & run of show',540),
       orga('tech','Stage and streaming rehearsal',660),
       orga('partners','Partner & logistics briefing',840),
       talk('integrations','Connected apps with MCP','MCP & Integrations',3,600,'leo',150),
+      talk('retrieval','Reliable retrieval for agents','AI & Agents',3,630,'maya',90,'studio'),
       talk('research','Designing for human control','Product Design',3,870,'nora',60),
       talk('security','Trustworthy AI in practice','Data & Trust',4,540,'maya',60),
+      talk('design-systems','Design systems for AI','Product Design',4,540,'nora',60,'studio'),
       talk('closing','The next developer platform','Platform Engineering',4,720,'leo',150),
     ]};
 }

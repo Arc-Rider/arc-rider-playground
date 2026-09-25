@@ -89,7 +89,8 @@ test('summit talks have intro/main/demo, main-only speakers and hour-long breaks
  const plan=hydrate(summitSeed());
  for(const day of ['2026-10-12','2026-10-13','2026-10-15','2026-10-16']) {
   const talks=plan.sessions.filter(s=>s.date===day).sort((a,b)=>a.start-b.start);
-  assert.equal(talks[1].start-parts(talks[0]).at(-1).end,60);
+  assert.ok(talks.some((s,i)=>talks.slice(i+1).some(t=>s.roomId!==t.roomId && s.start < parts(t).at(-1).end && t.start < parts(s).at(-1).end)));
+  for(const room of plan.rooms){const track=talks.filter(s=>s.roomId===room.id);for(let i=1;i<track.length;i++)assert.ok(track[i].start-parts(track[i-1]).at(-1).end>=60);}
   for(const s of talks){assert.deepEqual(s.segments.map(p=>p.id),['intro','main','demo']);assert.deepEqual(s.segments.map(p=>p.speakerIds.length),[0,1,0]);}
  }
  assert.ok(plan.sessions.filter(s=>s.date==='2026-10-14').every(s=>s.topic==='Organization'));
