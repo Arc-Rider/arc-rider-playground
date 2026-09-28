@@ -6,17 +6,27 @@
   "workspaces": [
     "demos/jev/prompt-driven-views",
     "demos/mcp/arcwidgets-table",
-    "demos/mcp/arc-event"
+    "demos/mcp/arc-event",
+    "demos/mcp/arcwidgets-renderer",
+    "packages/demo-kit"
   ],
   "scripts": {
+    "kit:build": "npm run build --workspace @arcrider/playground-demo-kit",
+    "prebuild": "npm run kit:build",
+    "pretest": "npm run kit:build",
     "dev": "npm run dev --workspace @arcrider/playground-prompt-driven-views",
-    "build": "npm run build --workspace @arcrider/playground-prompt-driven-views && npm run build --workspace @arcrider/playground-mcp-table && npm run event:build",
-    "test": "npm run test --workspace @arcrider/playground-prompt-driven-views && npm run test --workspace @arcrider/playground-mcp-table && npm run event:test",
-    "test:ui": "npm run test:ui --workspace @arcrider/playground-prompt-driven-views",
+    "build": "npm run build --workspace @arcrider/playground-prompt-driven-views && npm run build --workspace @arcrider/playground-mcp-table && npm run event:build && npm run renderer:build",
+    "test": "npm run test --workspace @arcrider/playground-prompt-driven-views && npm run test --workspace @arcrider/playground-mcp-table && npm run event:test && npm run renderer:test && npm run check:demos",
+    "check:demos": "node packages/demo-kit/scripts/check-demo.mjs demos/mcp/arc-event --session --resource=ui://arc-rider/arc-event-v2.html && PLAYGROUND=1 node packages/demo-kit/scripts/check-demo.mjs demos/mcp/arcwidgets-table --resource=ui://arc-rider/arcwidgets-table.html && node packages/demo-kit/scripts/check-demo.mjs demos/mcp/arcwidgets-table --resource=ui://arc-rider/arcwidgets-table.html -- --http && PLAYGROUND=1 node packages/demo-kit/scripts/check-demo.mjs demos/mcp/arcwidgets-renderer --resource=ui://arc-rider/dynamic-table/v1.html",
+    "test:ui": "npm run test:ui --workspace @arcrider/playground-prompt-driven-views && npm run test:ui --workspace @arcrider/playground-mcp-renderer",
     "mcp:start": "npm run start --workspace @arcrider/playground-mcp-table",
     "mcp:preview": "npm run preview --workspace @arcrider/playground-mcp-table",
     "event:start": "npm run start --workspace @arcrider/playground-arc-event",
     "event:build": "npm run build --workspace @arcrider/playground-arc-event",
-    "event:test": "npm run test --workspace @arcrider/playground-arc-event"
+    "event:test": "npm run test --workspace @arcrider/playground-arc-event",
+    "renderer:build": "npm run build --workspace @arcrider/playground-mcp-renderer",
+    "renderer:test": "npm run test --workspace @arcrider/playground-mcp-renderer",
+    "renderer:start": "npm run start --workspace @arcrider/playground-mcp-renderer",
+    "renderer:data": "npm run start:data --workspace @arcrider/playground-mcp-renderer"
   }
 }

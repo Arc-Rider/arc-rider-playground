@@ -9,7 +9,7 @@ Runnable, live examples built with the [published arcWidgets React package](http
 
 Both use fictional data and make real TypeSafe calls when configured. There are no scripted presentations or prerecorded decisions in this repository. Presentation scripts and videos remain in the separate local widget sandbox and can be developed independently.
 
-A hosted playground serves these MCP demos publicly at `playground.arc-rider.com` with a private 24-hour session per visitor. That landing page, session gateway and deploy tooling live in the separate `arc-rider-universe` repo (`infra/hetzner/playground/`), not here — this repo stays limited to demo source anyone can read, fork or self-host.
+A hosted playground serves these MCP demos publicly at `playground.arc-rider.com` with a private 24-hour session per visitor. That landing page, session gateway and deploy tooling live in the separate `arc-rider-universe` repo (`infra/hetzner/playground/`), not here — this repo stays limited to demo source anyone can read, fork or self-host. Shared HTTP, session, preview and ChatGPT metadata live in [`packages/demo-kit`](packages/demo-kit). The catalog is [`demos.json`](demos.json).
 
 The [MCP grouped table](demos/mcp/arcwidgets-table/README.md) is a third, independent example. An MCP tool returns fictional database objects and a linked UI resource renders them with published arcWidgets. You can preview its UI locally without an MCP host or connect the read-only tool to a host that supports MCP Apps. `demos/apps` is reserved for future examples.
 
@@ -35,6 +35,10 @@ The UI check needs Playwright Chromium (`npx playwright install chromium`). CI r
 ## Publishing boundary
 
 The repository contains no API key, GitHub issue import, customer data, scripted recording or widget-library source. The MCP table is read-only and uses fictional rows. The local Jev server is development middleware bound to localhost. A public deployment needs authentication and usage controls on its own backend. The example code is [MIT licensed](LICENSE); [brand assets](BRAND.md) and the installed arcWidgets package have separate rights and [commercial terms](https://www.arc-rider.com/terms).
+
+## Dynamic table with a separate data MCP
+
+[Dynamic table](demos/mcp/arcwidgets-renderer/README.md) lets an assistant choose columns, grouping, sorting and formats for records retrieved from a separate fictional orders/tickets MCP. Run `npm run renderer:build`; the linked guide covers both connections, local preview and verification. This is a local example, not yet a deployed playground route.
 
 ## Event planning MCP App
 

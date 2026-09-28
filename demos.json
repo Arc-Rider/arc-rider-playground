@@ -1,0 +1,35 @@
+{
+  "demos": [
+    {
+      "id": "event",
+      "title": "arcEvent — Tech Summit",
+      "path": "demos/mcp/arc-event",
+      "workspace": "@arcrider/playground-arc-event",
+      "port": 4194,
+      "sessionRequired": true,
+      "resourceUri": "ui://arc-rider/arc-event-v2.html",
+      "build": "event:build"
+    },
+    {
+      "id": "table",
+      "title": "Grouped table",
+      "path": "demos/mcp/arcwidgets-table",
+      "workspace": "@arcrider/playground-mcp-table",
+      "port": 4193,
+      "sessionRequired": false,
+      "resourceUri": "ui://arc-rider/arcwidgets-table.html",
+      "build": "build --workspace @arcrider/playground-mcp-table"
+    },
+    {
+      "id": "renderer",
+      "title": "Dynamic table renderer",
+      "path": "demos/mcp/arcwidgets-renderer",
+      "workspace": "@arcrider/playground-mcp-renderer",
+      "port": 4195,
+      "sessionRequired": false,
+      "resourceUri": "ui://arc-rider/dynamic-table/v1.html",
+      "build": "renderer:build",
+      "hosted": false
+    }
+  ]
+}
