@@ -1,0 +1,38 @@
+{
+  "name": "@arcrider/playground-mcp-renderer",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Generic arcWidgets renderer and independent fictional data MCP",
+  "scripts": {
+    "build": "tsc --noEmit && tsc -p tsconfig.server.json && cross-env INPUT=mcp-app.html vite build && node ../../../scripts/write-version.mjs dist",
+    "start": "node dist/main.js --stdio",
+    "preview": "vite preview --host 127.0.0.1 --port 4195 --strictPort",
+    "test": "npm run build && node scripts/check-mcp.mjs",
+    "start:data": "node dist/main.js --data",
+    "start:http": "node dist/main.js --http",
+    "start:data:http": "node dist/main.js --data --http",
+    "test:ui": "node scripts/check-ui.mjs"
+  },
+  "dependencies": {
+    "@arcrider/playground-demo-kit": "*",
+    "@arcrider/arcwidgets-react": "0.1.0-alpha.5",
+    "@modelcontextprotocol/ext-apps": "2.0.0",
+    "@modelcontextprotocol/server": "2.0.0",
+    "react": "19.2.0",
+    "react-dom": "19.2.0",
+    "zod": "4.2.0"
+  },
+  "devDependencies": {
+    "@modelcontextprotocol/client": "2.0.0",
+    "@types/node": "22.19.5",
+    "@types/react": "19.1.12",
+    "@types/react-dom": "19.1.9",
+    "@vitejs/plugin-react": "5.2.0",
+    "cross-env": "10.1.0",
+    "typescript": "5.9.3",
+    "vite": "6.4.3",
+    "vite-plugin-singlefile": "2.3.3",
+    "@playwright/test": "1.58.2"
+  }
+}
