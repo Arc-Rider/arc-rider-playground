@@ -60,7 +60,7 @@ export async function startDemoServer<T>(options: StartDemoServerOptions<T>) {
 
   const stores = options.session ? new SessionStoreMap(options.session.createStore) : null;
   const port = Number(process.env.PORT ?? options.port ?? 4194);
-  const host = options.host ?? (playground ? '0.0.0.0' : '127.0.0.1');
+  const host = options.host ?? process.env.HOST ?? (playground ? '0.0.0.0' : '127.0.0.1');
   const maxBody = options.maxBody ?? 100_000;
   const previewPaths = new Set(options.previewPaths ?? ['/', '/preview']);
   const versionDir = options.versionDir ?? process.cwd();
