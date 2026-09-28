@@ -5,13 +5,14 @@
   "type": "module",
   "description": "Segment-based event planning MCP App",
   "scripts": {
-    "build": "tsc --noEmit && tsc -p tsconfig.server.json && cross-env INPUT=mcp-app.html vite build",
+    "build": "tsc --noEmit && tsc -p tsconfig.server.json && cross-env INPUT=mcp-app.html vite build && node ../../../scripts/write-version.mjs dist",
     "start": "node dist/main.js",
     "preview": "node dist/main.js",
     "test": "npm run build && node --test scripts/event.test.mjs && node scripts/check-mcp.mjs && node scripts/check-http.mjs",
     "start:stdio": "node dist/main.js --stdio"
   },
   "dependencies": {
+    "@arcrider/playground-demo-kit": "*",
     "@arcrider/arcwidgets-react": "0.1.0-alpha.6",
     "@modelcontextprotocol/ext-apps": "2.0.0",
     "@modelcontextprotocol/server": "2.0.0",

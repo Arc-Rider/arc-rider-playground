@@ -1,11 +1,18 @@
 import { registerAppResource, registerAppTool, RESOURCE_MIME_TYPE } from '@modelcontextprotocol/ext-apps/server';
 import { McpServer } from '@modelcontextprotocol/server';
+import { uiMeta as kitUiMeta } from '@arcrider/playground-demo-kit';
 import { z } from 'zod';
 import fs from 'node:fs/promises';
 import path from 'node:path';
 import { applyChange, changeSchema, seed, snapshot } from './event.js';
 
-export const RESOURCE_URI = 'ui://arc-rider/arc-event.html';
+// The resource URI is also ChatGPT's cache key. Keep a version in it so a
+// changed app bundle cannot be confused with an older cached template.
+export const RESOURCE_URI = 'ui://arc-rider/arc-event-v2.html';
+
+function uiMeta() {
+  return kitUiMeta(RESOURCE_URI);
+}
 export class EventStore {
   private plan = seed();
   private queue = Promise.resolve();
@@ -36,13 +43,17 @@ export function createServer(store: EventStore) {
   });
   for (const view of ['calendar', 'timeline', 'table', 'capacity'] as const) registerAppTool(server, `show_event_${view}`, {
     title: `arcEvent ${view}`, description: `Show a compact ${view === 'calendar' ? 'Monday–Friday calendar with movable sessions' : view === 'timeline' ? 'segment timeline grouped by room or speaker' : view === 'table' ? 'arcTable of sessions, speakers and bookings' : 'capacity and booking progress'} view. Saved data for the current event session. Dates are ISO dates in 12–18 October 2026; start times are minutes after midnight in Europe/Berlin.`,
-    inputSchema: z.object({}), annotations: { readOnlyHint: true, openWorldHint: false }, _meta: { ui: { resourceUri: RESOURCE_URI } },
-  }, async () => ({ ...response(store.read()), structuredContent: { ...store.read(), view } }));
+    inputSchema: z.object({}), annotations: { readOnlyHint: true, openWorldHint: false }, _meta: uiMeta(),
+  }, async () => ({ ...response(store.read()), structuredContent: { ...store.read(), view }, _meta: uiMeta() }));
   server.registerTool('get_event_plan', { description: 'Read the authoritative event plan and room/speaker/availability conflicts. Use before edits and after UI interactions.', inputSchema: z.object({}), annotations: { readOnlyHint: true, openWorldHint: false } }, async () => response(store.read()));
   for (const preview of [true, false]) server.registerTool(preview ? 'preview_event_changes' : 'update_event_plan', {
     description: `${preview ? 'Preview without saving' : 'Save atomically'} a batch of session and speaker changes. Moving a session keeps all its segments together. To edit segments, supply the complete ordered segments array; durations determine sequential times. Speaker availability is checked per segment. Lunch is fixed. Conflicts are reported, not silently fixed. expectedRevision protects newer changes. Preview does not reserve its hypothetical revision; use the original saved revision to apply.`,
     inputSchema: changeSchema, annotations: { readOnlyHint: preview, destructiveHint: false, idempotentHint: false, openWorldHint: false },
   }, async args => { try { return response(await store.change(args, preview), preview); } catch (e) { return { isError: true, content: [{ type: 'text' as const, text: (e as Error).message }] }; } });
-  registerAppResource(server, 'arcEvent', RESOURCE_URI, { mimeType: RESOURCE_MIME_TYPE }, async () => ({ contents: [{ uri: RESOURCE_URI, mimeType: RESOURCE_MIME_TYPE, text: await appHtml(), _meta: { ui: { prefersBorder: true, csp: {} } } }] }));
+  registerAppResource(server, 'arcEvent', RESOURCE_URI, {
+    description: 'Interactive arcEvent calendar, timeline, table and capacity views',
+    mimeType: RESOURCE_MIME_TYPE,
+    _meta: { ui: { prefersBorder: true, csp: {} } },
+  }, async () => ({ contents: [{ uri: RESOURCE_URI, mimeType: RESOURCE_MIME_TYPE, text: await appHtml(), _meta: { ui: { prefersBorder: true, csp: {} } } }] }));
   return server;
 }

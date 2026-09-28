@@ -1,4 +1,5 @@
 import { useApp, useHostStyles } from '@modelcontextprotocol/ext-apps/react';
+import { isPlaygroundPreview } from '@arcrider/playground-demo-kit/react';
 import { ArcWidgetCalendarWeek, ArcWidgetCalendarTimeline, ArcWidgetTable, ArcWidgetProgressBar, ArcWidgetBadge, ArcWidgetButton, ArcWidgetLayout, type ArcWidgetCalendarTimelineProps, type ArcWidgetCalendarWeekProps, type ArcWidgetTableData } from '@arcrider/arcwidgets-react';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { clock, end, parts, nativeMoveChanges, type NativeSegmentMove, weekDates, type Change, type Session, type Snapshot } from '../event';
@@ -13,9 +14,10 @@ const viewNames: Record<View,string> = {calendar:'Week',timeline:'Timeline',tabl
 export function EventApp() {
   const params = new URLSearchParams(window.location.search);
   const preview = params.get('mcp');
-  const standalone = window.parent === window || params.get('standalone') === '1';
+  const playgroundPreview = isPlaygroundPreview();
+  const standalone = window.parent === window || playgroundPreview;
   const initialView = preview && preview in viewNames ? preview as View : 'calendar';
-  return standalone ? <Planner bridge={local} compact={!!preview} initialView={initialView}/> : <Embedded />;
+  return standalone ? <Planner bridge={local} compact={!!preview} playgroundPreview={playgroundPreview} initialView={initialView}/> : <Embedded />;
 }
 function Embedded() {
   const [incoming, setIncoming] = useState<Payload>();
@@ -49,7 +51,7 @@ const topicThemes: Record<string,{ink:string;main:string;intro:string;demo:strin
 const themeFor = (s:Session) => topicThemes[s.topic ?? 'Organization'] ?? topicThemes.Organization;
 const fillFor = (s:Session,id:string) => {const t=themeFor(s);return id==='intro'?t.intro:id==='demo'?t.demo:t.main;};
 const breakDay = {date:Date.UTC(2026,9,14),color:'#fff7e5',title:{label:'Wed 14 · Break'}};
-function Planner({ bridge, incoming, compact=false, initialView='calendar' }: { bridge: Bridge; incoming?: Payload; compact?:boolean; initialView?:View }) {
+function Planner({ bridge, incoming, compact=false, playgroundPreview=false, initialView='calendar' }: { bridge: Bridge; incoming?: Payload; compact?:boolean; playgroundPreview?:boolean; initialView?:View }) {
   const [state, setState] = useState<Payload>(); const [view, setView] = useState<View>(initialView);
   const [needsValidation,setNeedsValidation] = useState(false); const [validationMessage,setValidationMessage] = useState('');
   const nativeMoves = useRef<NativeSegmentMove[]>([]); const [calendarReset, setCalendarReset] = useState(0);
@@ -182,9 +184,9 @@ function Planner({ bridge, incoming, compact=false, initialView='calendar' }: { 
     <header><div><strong>arcEvent</strong><span>{compact ? `Tech Summit · ${viewNames[view]}` : 'Tech Summit · 12–16 Oct 2026'}</span></div><div className="header-actions">{needsValidation && <ArcWidgetButton id="validate-plan" data={{title:busy?'Working…':'Validate Plan',height:'30px',fontSize:'12px',backgroundColor:'#27272a',fontColor:'#ffffff',borderRadius:'0px'}} onClick={validatePlan}/>} {!compact && <button onClick={refresh} disabled={busy} aria-label="Refresh plan">↻</button>}</div></header>
     {(compact && (error || validationMessage || busy)) && <div className="validation-status" role={error?'alert':'status'}>{error || (busy?'Saving…':validationMessage)}</div>}
     {!compact && <><nav aria-label="Event views">{(['calendar','timeline','table','capacity'] as View[]).map(v=><button key={v} aria-pressed={view===v} onClick={()=>{setView(v);setSelected(undefined);}}>{v==='calendar'?'Week':v==='timeline'?'Timeline':v==='table'?'Sessions':'Bookings'}</button>)}<button className="conflict-toggle" onClick={()=>setShowConflicts(!showConflicts)}>{conflicts.length} conflicts</button></nav>
-    <div className="toolbar"><span>{view==='calendar'?'Drag to move · changes are saved · Berlin time':view==='timeline'?timelineDay==='all'?'Summit overview · drag between days · select a day for hours':'Drag to move session · resize to adjust main talk':view==='table'?`${visible.length} sessions · click to edit`:'Expand a session to see individual bookings'}</span><select aria-label="Filter rooms or speakers" value={filter} onChange={e=>setFilter(e.target.value)}><option value="all">All rooms & speakers</option><optgroup label="Rooms">{plan.rooms.map(r=><option key={r.id} value={r.id}>{r.name}</option>)}</optgroup><optgroup label="Speakers">{plan.speakers.map(r=><option key={r.id} value={r.id}>{r.name}</option>)}</optgroup></select></div>
-    {view==='timeline' && <select aria-label="Timeline grouping" value={groupBy} onChange={e=>setGroupBy(e.target.value)}><option value="rooms">By room</option><option value="speakers">By speaker</option></select>}
-    <div className="mcp-preview-links"><span>MCP App previews</span>{(Object.keys(viewNames) as View[]).map(v=><a key={v} href={`?mcp=${v}`}>{viewNames[v]} ↗</a>)}</div>
+    {!playgroundPreview && <div className="toolbar"><span>{view==='calendar'?'Drag to move · changes are saved · Berlin time':view==='timeline'?timelineDay==='all'?'Summit overview · drag between days · select a day for hours':'Drag to move session · resize to adjust main talk':view==='table'?`${visible.length} sessions · click to edit`:'Expand a session to see individual bookings'}</span><select aria-label="Filter rooms or speakers" value={filter} onChange={e=>setFilter(e.target.value)}><option value="all">All rooms & speakers</option><optgroup label="Rooms">{plan.rooms.map(r=><option key={r.id} value={r.id}>{r.name}</option>)}</optgroup><optgroup label="Speakers">{plan.speakers.map(r=><option key={r.id} value={r.id}>{r.name}</option>)}</optgroup></select></div>}
+    {!playgroundPreview && view==='timeline' && <select aria-label="Timeline grouping" value={groupBy} onChange={e=>setGroupBy(e.target.value)}><option value="rooms">By room</option><option value="speakers">By speaker</option></select>}
+    {!playgroundPreview && <div className="mcp-preview-links"><span>MCP App previews</span>{(Object.keys(viewNames) as View[]).map(v=><a key={v} href={`?mcp=${v}`}>{viewNames[v]} ↗</a>)}</div>}
     {validationMessage && <div className="validation-status" role="status">{validationMessage}</div>}
     </>}
     {showConflicts && <div className="conflicts">{conflicts.map(c=><button key={c.id} onClick={()=>setSelected(c.sessionIds[0])}>{c.message}</button>)}{!conflicts.length && <span>No conflicts</span>}</div>}

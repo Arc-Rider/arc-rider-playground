@@ -13,7 +13,7 @@ await new Promise(resolve => probe.close(resolve));
 const dir = await mkdtemp(path.join(os.tmpdir(), 'arc-event-http-'));
 const child = spawn(process.execPath, ['dist/main.js'], {env: {...process.env, PLAYGROUND:'1', PORT:String(port), PLAYGROUND_STORE_DIR:dir}, stdio:['ignore','pipe','pipe']});
 const base = `http://127.0.0.1:${port}`;
-const request = (session, pathname, body) => fetch(base + pathname, {method:body?'POST':'GET', headers:{'x-playground-session':session, 'content-type':'application/json', accept:'application/json, text/event-stream'}, ...(body?{body:JSON.stringify(body)}:{})});
+const request = (session, pathname, body) => fetch(base + pathname, {method:body?'POST':'GET', headers:{'x-playground-session':session, 'content-type':'application/json', accept:'application/json, text/event-stream'}, signal:AbortSignal.timeout(5000), ...(body?{body:JSON.stringify(body)}:{})});
 try {
   await Promise.race([once(child.stdout, 'data'), once(child, 'exit').then(() => {throw new Error('HTTP server exited');}), new Promise((_, reject) => {const timer=setTimeout(()=>reject(new Error('HTTP startup timeout')),10000);timer.unref();})]);
   assert.equal((await fetch(base+'/api/plan')).status,401);
@@ -26,11 +26,20 @@ try {
   assert.equal(saved.plan.revision,1);
   assert.equal(isolated.plan.revision,0);
   assert.equal(isolated.plan.sessions.find(s=>s.id==='keynote').start,540);
-  const rpc=await (await request(a,'/mcp',{jsonrpc:'2.0',id:1,method:'tools/call',params:{name:'get_event_plan',arguments:{}}})).json();
+  await request(a,'/mcp',{jsonrpc:'2.0',id:1,method:'initialize',params:{protocolVersion:'2025-06-18',capabilities:{},clientInfo:{name:'check',version:'1'}}});
+  const rpc=await (await request(a,'/mcp',{jsonrpc:'2.0',id:2,method:'tools/call',params:{name:'get_event_plan',arguments:{}}})).json();
   assert.equal(rpc.result.structuredContent.plan.revision,1);
-  console.log('HTTP: invalid sessions rejected, concurrent first writes serialized, sessions isolated, MCP readback passed.');
+  const method=await fetch(base+'/mcp',{method:'GET',headers:{'x-playground-session':a,accept:'text/event-stream'},signal:AbortSignal.timeout(2000)});
+  assert.equal(method.status,405);
+  const preview=await request(a,'/preview');
+  assert.equal(preview.status,200);
+  assert.match(await preview.text(),/arcEvent/);
+  const health=await (await fetch(base+'/healthz')).json();
+  assert.equal(health.ok,true);
+  assert.equal(typeof health.commit,'string');
+  console.log('HTTP: invalid sessions rejected, concurrent first writes serialized, sessions isolated, MCP readback, preview and 405 passed.');
 } finally {
-  child.kill();
+  child.kill('SIGKILL');
   await once(child,'exit');
   await rm(dir,{recursive:true,force:true});
 }

@@ -19,6 +19,8 @@
 
 .timeline-session{height:100%;width:100%;min-width:0;pointer-events:none}.timeline-session-text{min-width:0;line-height:1.25}.timeline-speaker{font-size:10px;opacity:.8;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.timeline-talk{font-size:12px;font-weight:600;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 
+.event-app nav{margin-bottom:16px}
+
 .timeline-day-nav{display:flex;gap:4px;flex-wrap:wrap;margin:0 0 10px}
 
 .week-scroll{width:100%;overflow-x:auto}.week-wide{min-width:1534px}
