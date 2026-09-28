@@ -1,4 +1,5 @@
 import { useApp, useHostStyles } from "@modelcontextprotocol/ext-apps/react";
+import { isPlaygroundPreview } from "@arcrider/playground-demo-kit/react";
 import {
   ArcWidgetBadge,
   ArcWidgetIcon,
@@ -328,7 +329,7 @@ export function TableApp() {
   });
 
   useHostStyles(app, app?.getHostContext());
-  const standalone = window.parent === window;
+  const standalone = window.parent === window || isPlaygroundPreview();
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;

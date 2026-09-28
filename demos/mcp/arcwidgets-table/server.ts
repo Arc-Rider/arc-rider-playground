@@ -4,6 +4,7 @@ import {
   RESOURCE_MIME_TYPE,
 } from "@modelcontextprotocol/ext-apps/server";
 import { McpServer } from "@modelcontextprotocol/server";
+import { uiMeta as kitUiMeta } from "@arcrider/playground-demo-kit";
 import fs from "node:fs/promises";
 import path from "node:path";
 import { z } from "zod";
@@ -12,13 +13,10 @@ import { buildPayload, summarizePayload } from "./projects.js";
 export const RESOURCE_URI = "ui://arc-rider/arcwidgets-table.html";
 
 function uiMeta() {
-  return {
-    ui: { resourceUri: RESOURCE_URI },
-    "ui/resourceUri": RESOURCE_URI,
-  };
+  return kitUiMeta(RESOURCE_URI);
 }
 
-async function readAppHtml(): Promise<string> {
+export async function readAppHtml(): Promise<string> {
   const here = import.meta.dirname;
   const candidates = [
     path.join(here, "mcp-app.html"),
@@ -54,9 +52,7 @@ export function createServer(): McpServer {
         readOnlyHint: true,
         openWorldHint: false,
       },
-      _meta: {
-        ui: { resourceUri: RESOURCE_URI },
-      },
+      _meta: uiMeta(),
     },
     async () => {
       const payload = buildPayload();

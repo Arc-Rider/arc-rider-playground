@@ -25,6 +25,6 @@ To connect an MCP Apps-capable host, add a stdio server entry to its MCP configu
 }
 ```
 
-Ask the host to call `show_grouped_table`. An MCP Apps-capable host displays the bundled table; text-only MCP clients receive a short summary. For a standalone look at the UI (sample data only), run `npm run mcp:preview` and open <http://127.0.0.1:4193/mcp-app.html>. The standalone preview does not invoke an MCP tool.
+Ask the host to call `show_grouped_table`. An MCP Apps-capable host displays the bundled table; text-only MCP clients receive a short summary. For a standalone look at the UI (sample data only), run `npm run mcp:preview` and open <http://127.0.0.1:4193/mcp-app.html>. The standalone preview does not invoke an MCP tool. The bundled HTML includes a domain-bound `ArcWidgetsLicenseKeys` entry for `playground.arc-rider.com`; localhost needs no key.
 
 `npm run test` checks the tool's structured result, metadata and self-contained UI resource through a real stdio MCP client. The [MCP Apps quickstart](https://github.com/modelcontextprotocol/ext-apps/blob/main/docs/quickstart.md) describes this tool-plus-resource pattern.
