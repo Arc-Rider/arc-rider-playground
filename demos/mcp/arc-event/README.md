@@ -50,6 +50,14 @@ The alpha.6 native drag callback provides destination values and nested source i
 
 For segment edits, send the complete ordered `segments` array for the affected session. Preview returns a hypothetical revision; apply using the original saved revision. Refresh after a stale-revision error.
 
+## Hosted demo URL
+
+The public playground exposes this demo at
+`https://playground.arc-rider.com/mcp/event` without a personal session URL. The
+first `initialize` call receives a 24-hour `Mcp-Session-Id`. Changes stay in that
+chat connection and then expire. `mcp.arc-rider.com` is reserved for a later
+production widget MCP and is not used here.
+
 ## Connect to ChatGPT
 
 The app is built and verified locally. A hosted demo is available through the [Arc Rider Playground](https://playground.arc-rider.com/), which issues a temporary session URL. Installation in ChatGPT is separate. A ChatGPT web connection needs an accessible deployed MCP URL; the local address above is for local testing. Use a controlled HTTPS deployment or development tunnel to `/mcp`, then follow the current [OpenAI connection guide](https://developers.openai.com/plugins/quickstart). Exact account access and developer-mode availability depend on the account.

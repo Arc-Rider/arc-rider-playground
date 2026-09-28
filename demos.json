@@ -7,6 +7,7 @@
       "workspace": "@arcrider/playground-arc-event",
       "port": 4194,
       "sessionRequired": true,
+      "publicMcp": "event",
       "resourceUri": "ui://arc-rider/arc-event-v2.html",
       "build": "event:build"
     },
@@ -17,6 +18,7 @@
       "workspace": "@arcrider/playground-mcp-table",
       "port": 4193,
       "sessionRequired": false,
+      "publicMcp": "data-explorer",
       "resourceUri": "ui://arc-rider/arcwidgets-table.html",
       "build": "build --workspace @arcrider/playground-mcp-table"
     },
